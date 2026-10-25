@@ -24,6 +24,7 @@ from PySide6.QtWidgets import QApplication, QMessageBox  # noqa: E402
 from kospi_insight.database import Database  # noqa: E402
 from kospi_insight.dialogs import AddStockDialog  # noqa: E402
 from kospi_insight.main_window import MainWindow  # noqa: E402
+from kospi_insight.sectors import is_financial_stock  # noqa: E402
 from kospi_insight.services import FilterCriteria, MarketService  # noqa: E402
 from kospi_insight.theme import apply_theme  # noqa: E402
 
@@ -86,6 +87,49 @@ def main() -> int:
         pump(app, 0.05)
         rows = len(screener._last_result.rows) if screener._last_result else 0
         check(f"preset {preset} has rows", rows > 0, str(rows))
+
+    screener.apply_preset("기본")
+    screener._set_share_type("preferred")
+    screener.apply_filters()
+    pump(app, 0.05)
+    preferred_rows = screener._last_result.rows
+    check(
+        "preferred-only rows",
+        bool(preferred_rows) and all(row.get("is_preferred") for row in preferred_rows),
+        str(len(preferred_rows)),
+    )
+    screener._set_share_type("common")
+    screener.apply_filters()
+    pump(app, 0.05)
+    common_rows = screener._last_result.rows
+    check(
+        "common-only rows",
+        bool(common_rows) and not any(row.get("is_preferred") for row in common_rows),
+        str(len(common_rows)),
+    )
+    screener._set_share_type("all")
+    screener.financial_check.setChecked(True)
+    screener._fields["debt_ratio"].set_text("150")
+    screener.apply_filters()
+    pump(app, 0.05)
+    debt_rows = screener._last_result.rows
+    check("debt-ratio rows", bool(debt_rows), str(len(debt_rows)))
+    check(
+        "financials excluded from debt ratio",
+        not any(is_financial_stock(row["code"], row.get("name") or "") for row in debt_rows),
+    )
+    screener.financial_check.setChecked(False)
+    screener.apply_filters()
+    pump(app, 0.05)
+    check(
+        "financials can be included when option off",
+        any(
+            is_financial_stock(row["code"], row.get("name") or "")
+            for row in screener._last_result.rows
+        ),
+    )
+    screener.reset_filters()
+    pump(app, 0.05)
 
     screener.apply_preset("기본")
     screener._fields["per_min"].set_text("20")

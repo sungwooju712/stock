@@ -18,7 +18,6 @@ from openpyxl import Workbook
 from openpyxl.chart import BarChart, LineChart, Reference, Series
 from openpyxl.chart.axis import ChartLines
 from openpyxl.chart.data_source import StrRef
-from openpyxl.chart.label import DataLabelList
 from openpyxl.chart.shapes import GraphicalProperties
 from openpyxl.drawing.line import LineProperties
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -482,12 +481,11 @@ class ExcelReport:
 
         daily_chart = self._line_chart(
             wb["일일종가"],
-            "① 일별 종가 추이 (전체 기간)",
+            "① 일별 종가 추이 (전체 기간, 원)",
             stocks,
             header_row=4,
             first_row=5,
             last_row=4 + len(datasets["dates"]),
-            y_title="종가 (원)",
             tick_skip=max(1, len(datasets["dates"]) // 8),
         )
         daily_chart.width = 25.5
@@ -496,12 +494,11 @@ class ExcelReport:
 
         monthly_chart = self._line_chart(
             wb["월별종가"],
-            "② 월별 종가 추이",
+            "② 월별 종가 추이 (원)",
             stocks,
             header_row=4,
             first_row=5,
             last_row=4 + len(datasets["months"]),
-            y_title="종가 (원)",
             tick_skip=max(1, len(datasets["months"]) // 6),
         )
         monthly_chart.width = 12.4
@@ -510,7 +507,7 @@ class ExcelReport:
 
         annual_chart = self._annual_bar_chart(
             wb["연간데이터"],
-            "③ 연간 수익률 비교",
+            "③ 연간 수익률 비교 (%)",
             stocks,
             years=datasets["years"],
         )
@@ -637,12 +634,11 @@ class ExcelReport:
 
         chart1 = self._line_chart(
             wb["일일종가"],
-            "일별 종가 추이 (전체 기간)",
+            "일별 종가 추이 (전체 기간, 원)",
             stocks,
             header_row=4,
             first_row=5,
             last_row=4 + len(datasets["dates"]),
-            y_title="종가 (원)",
             tick_skip=max(1, len(datasets["dates"]) // 9),
         )
         chart1.width = 26
@@ -651,12 +647,11 @@ class ExcelReport:
 
         chart2 = self._line_chart(
             wb["월별종가"],
-            "월별 종가 추이",
+            "월별 종가 추이 (원)",
             stocks,
             header_row=4,
             first_row=5,
             last_row=4 + len(datasets["months"]),
-            y_title="종가 (원)",
             tick_skip=max(1, len(datasets["months"]) // 7),
         )
         chart2.width = 12.6
@@ -665,7 +660,7 @@ class ExcelReport:
 
         chart3 = self._annual_bar_chart(
             wb["연간데이터"],
-            "연간 수익률 비교",
+            "연간 수익률 비교 (%)",
             stocks,
             years=datasets["years"],
         )
@@ -892,14 +887,16 @@ class ExcelReport:
         header_row: int,
         first_row: int,
         last_row: int,
-        y_title: str,
         tick_skip: int,
     ) -> LineChart:
         chart = LineChart()
         chart.title = title
         chart.style = 10
-        chart.y_axis.title = y_title
-        chart.x_axis.title = "날짜"
+        # The report charts are deliberately compact.  Native axis titles are
+        # omitted because Excel places them over the tick labels at this size;
+        # the unit is included in the chart title instead.
+        chart.y_axis.title = None
+        chart.x_axis.title = None
         chart.y_axis.numFmt = "#,##0"
         chart.y_axis.majorGridlines = ChartLines()
         chart.y_axis.majorGridlines.spPr = GraphicalProperties(
@@ -945,8 +942,12 @@ class ExcelReport:
         chart.gapWidth = 70
         chart.title = title
         chart.style = 10
-        chart.y_axis.title = "수익률 (%)"
-        chart.x_axis.title = "연도"
+        # Keep the plot area clear: units live in the title and the exact
+        # values are available in the 연간데이터 sheet.
+        chart.y_axis.title = None
+        chart.x_axis.title = None
+        # Put year labels below negative bars instead of on the zero line.
+        chart.x_axis.tickLblPos = "low"
         chart.y_axis.numFmt = '0.0"%"'
         chart.y_axis.majorGridlines = ChartLines()
         chart.y_axis.majorGridlines.spPr = GraphicalProperties(
@@ -972,6 +973,7 @@ class ExcelReport:
                 max_row=last_data_row,
             )
             series = Series(reference, title=stock["name"])
+            series.invertIfNegative = False
             series.graphicalProperties.solidFill = CHART_COLORS[index % len(CHART_COLORS)].lstrip("#")
             series.graphicalProperties.line.solidFill = CHART_COLORS[index % len(CHART_COLORS)].lstrip("#")
             chart.series.append(series)
@@ -980,8 +982,9 @@ class ExcelReport:
                 data_ws, min_col=1, min_row=first_data_row, max_row=last_data_row
             )
             chart.set_categories(categories)
-        chart.dLbls = DataLabelList()
-        chart.dLbls.showVal = False
+        # No data labels: Excel's default "series, category" labels overlap
+        # heavily on a four-stock clustered chart.
+        chart.dLbls = None
         return chart
 
     # ------------------------------------------------------------------
@@ -1002,7 +1005,8 @@ class ExcelReport:
         if criteria.market_cap_min is not None:
             parts.append(f"시가총액 ≥ {criteria.market_cap_min:,.0f}억원")
         if criteria.debt_ratio_max is not None:
-            parts.append(f"부채비율 ≤ {criteria.debt_ratio_max:,.1f}%")
+            suffix = " (금융주 제외)" if criteria.debt_ratio_exclude_financials else ""
+            parts.append(f"부채비율 ≤ {criteria.debt_ratio_max:,.1f}%{suffix}")
         if criteria.op_margin_min is not None:
             parts.append(f"영업이익률 ≥ {criteria.op_margin_min:,.1f}%")
         if criteria.per_min is not None or criteria.per_max is not None:
@@ -1017,7 +1021,9 @@ class ExcelReport:
             parts.append(f"배당수익률 ≥ {criteria.dividend_yield_min:,.1f}%")
         if criteria.net_income_positive:
             parts.append("당기순이익 흑자")
-        if not criteria.include_preferred:
+        if criteria.preferred_only:
+            parts.append("우선주만")
+        elif not criteria.include_preferred:
             parts.append("우선주 제외")
         if criteria.query:
             parts.append(f"검색어 '{criteria.query}'")

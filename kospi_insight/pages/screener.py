@@ -9,6 +9,7 @@ from typing import Any
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -183,12 +184,22 @@ class ScreenerPage(PageBase):
         option_row = QHBoxLayout()
         option_row.setSpacing(10)
         self.income_check = QCheckBox("당기순이익 흑자")
-        self.preferred_check = QCheckBox("우선주 포함")
-        self.preferred_check.setChecked(True)
+        self.share_type = QComboBox()
+        self.share_type.addItem("전체 (보통+우선)", "all")
+        self.share_type.addItem("보통주만", "common")
+        self.share_type.addItem("우선주만", "preferred")
+        self.share_type.setMinimumWidth(132)
+        self.share_type.setToolTip("전체: 보통주와 우선주 · 보통주만 · 우선주만")
+        self.financial_check = QCheckBox("부채비율 금융주 제외")
+        self.financial_check.setChecked(True)
+        self.financial_check.setToolTip(
+            "부채비율 조건을 사용할 때 금융주(은행·보험·증권·금융지주)를 결과에서 제외합니다."
+        )
         option_row.addWidget(self.income_check)
-        option_row.addWidget(self.preferred_check)
+        option_row.addWidget(self.share_type)
+        option_row.addWidget(self.financial_check)
         self.query_edit = SearchEdit("종목명·코드 검색")
-        self.query_edit.setMaximumWidth(240)
+        self.query_edit.setMaximumWidth(220)
         self.query_edit.returnPressed.connect(self.apply_filters)
         option_row.addWidget(self.query_edit, 1)
         self.filter_count = Badge("필터 1개", "teal")
@@ -310,7 +321,12 @@ class ScreenerPage(PageBase):
             self._fields["market_cap"].set_text(f"{cap_value:,.0f}")
         except ValueError:
             self._fields["market_cap"].set_text("1,000")
-        self.preferred_check.setChecked(self.db.get_meta("filter_include_preferred", "1") != "0")
+        include_preferred = self.db.get_meta("filter_include_preferred", "1") != "0"
+        self._set_share_type("all" if include_preferred else "common")
+
+    def _set_share_type(self, value: str) -> None:
+        index = self.share_type.findData(value)
+        self.share_type.setCurrentIndex(index if index >= 0 else 0)
 
     def _set_field(self, key: str, value: Any) -> None:
         if value is None:
@@ -326,7 +342,8 @@ class ScreenerPage(PageBase):
             field.clear()
         self.query_edit.clear()
         self.income_check.setChecked(bool(preset.get("net_income", False)))
-        self.preferred_check.setChecked(bool(preset.get("include_preferred", True)))
+        self._set_share_type("all" if preset.get("include_preferred", True) else "common")
+        self.financial_check.setChecked(True)
         self._set_field("market_cap", preset.get("market_cap", 1000))
         self._set_field("debt_ratio", preset.get("debt_max"))
         self._set_field("op_margin", preset.get("op_margin_min"))
@@ -342,7 +359,7 @@ class ScreenerPage(PageBase):
             field.clear()
         self.query_edit.clear()
         self.income_check.setChecked(False)
-        self.preferred_check.setChecked(True)
+        self.financial_check.setChecked(True)
         self._apply_defaults()
         self.apply_filters()
 
@@ -366,6 +383,7 @@ class ScreenerPage(PageBase):
             and values["per_min"] > values["per_max"]
         ):
             raise ValueError("PER 최소값이 최대값보다 클 수 없습니다.")
+        share_type = self.share_type.currentData() or "all"
         return FilterCriteria(
             market_cap_min=values["market_cap"],
             debt_ratio_max=values["debt_ratio"],
@@ -376,7 +394,9 @@ class ScreenerPage(PageBase):
             roe_min=values["roe"],
             dividend_yield_min=values["dividend"],
             net_income_positive=self.income_check.isChecked(),
-            include_preferred=self.preferred_check.isChecked(),
+            include_preferred=share_type != "common",
+            preferred_only=share_type == "preferred",
+            debt_ratio_exclude_financials=self.financial_check.isChecked(),
             query=self.query_edit.text().strip(),
         )
 

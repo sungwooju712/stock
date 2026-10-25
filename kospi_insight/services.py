@@ -22,6 +22,7 @@ from .naver import (
     parse_number,
     today_previous_close_cutoff,
 )
+from .sectors import is_financial_stock
 
 ProgressCallback = Callable[[str, int, int], None]
 
@@ -40,6 +41,8 @@ class FilterCriteria:
     dividend_yield_min: float | None = None
     net_income_positive: bool = False
     include_preferred: bool = True
+    preferred_only: bool = False
+    debt_ratio_exclude_financials: bool = True
     query: str = ""
 
     def active_count(self) -> int:
@@ -52,7 +55,7 @@ class FilterCriteria:
             self.roe_min is not None,
             self.dividend_yield_min is not None,
             self.net_income_positive,
-            not self.include_preferred,
+            self.preferred_only or not self.include_preferred,
         ]
         return sum(checks)
 
@@ -402,7 +405,16 @@ class MarketService:
         for row in all_rows:
             if row.get("per") is not None or row.get("sales") is not None:
                 fundamental_ready += 1
-            if not criteria.include_preferred and row.get("is_preferred"):
+            if criteria.preferred_only:
+                if not row.get("is_preferred"):
+                    continue
+            elif not criteria.include_preferred and row.get("is_preferred"):
+                continue
+            if (
+                criteria.debt_ratio_max is not None
+                and criteria.debt_ratio_exclude_financials
+                and is_financial_stock(row["code"], row.get("name") or "")
+            ):
                 continue
             if query and query not in (row.get("name") or "").lower() and query not in row["code"]:
                 continue
