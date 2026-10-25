@@ -22,13 +22,15 @@ AI 대화 자체는 파일로 저장되지 않으므로, 새 PC에서 OpenCode�
 
 ## 2. 전송 패키지
 
-OneDrive 동기화를 쓰지 않고 USB·클라우드로 옮길 때는 아래 압축 파일을 사용합니다.
+OneDrive 동기화를 쓰지 않고 USB·클라우드로 옮길 때는 로컬 프로젝트의 `handoff\` 폴더에 있는 압축 파일을 사용합니다.
+이 ZIP들은 용량 때문에 Git 저장소에는 포함하지 않았습니다.
 
 - `handoff\KOSPI_Insight_portable_20261024.zip` — 휴대용 실행본 (약 63 MB)
   - 압축을 풀면 `KOSPI Insight\KOSPI Insight.exe`가 나옵니다. 폴더 전체를 유지한 채 실행하세요.
 - `handoff\KOSPI_Insight_source_20261024.zip` — 소스·DB·미리보기 (약 0.8 MB)
   - 개발을 이어서 할 때 사용합니다. `dist`는 포함하지 않습니다.
 
+GitHub에서 새로 받는 경우에는 `requirements.txt`를 설치한 뒤 직접 실행하거나 `KOSPIInsight.spec`으로 빌드하면 됩니다.
 압축을 푼 뒤 첫 실행은 Windows Defender 검사 때문에 10~20초 걸릴 수 있습니다.
 
 ## 3. 다른 PC에서 바로 실행 (개발 환경 불필요)
