@@ -42,6 +42,8 @@ version_info = VSVersionInfo(
                     "040904B0",
                     [
                         StringStruct("CompanyName", "KOSPI Insight"),
+                        StringStruct("LegalCopyright", "© 2026 최미경"),
+                        StringStruct("Comments", "만든 사람: 최미경"),
                         StringStruct("FileDescription", "KOSPI 인사이트"),
                         StringStruct("FileVersion", "1.0.0"),
                         StringStruct("InternalName", "KOSPIInsight"),

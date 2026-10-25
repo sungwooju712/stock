@@ -19,7 +19,15 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .constants import APP_NAME, APP_TAGLINE, DISCLAIMER, SOURCE_NAME, SOURCE_URL, VERSION
+from .constants import (
+    APP_NAME,
+    APP_TAGLINE,
+    CREATOR_NAME,
+    DISCLAIMER,
+    SOURCE_NAME,
+    SOURCE_URL,
+    VERSION,
+)
 from .formatters import fmt_pct, fmt_price, tone_class
 from .icons import icon
 from .services import MarketService
@@ -292,6 +300,7 @@ class AboutDialog(QDialog):
         outer.addWidget(about_text)
 
         for label, value in [
+            ("만든 사람", CREATOR_NAME),
             ("데이터 출처", SOURCE_NAME),
             ("데이터 범위", "2023-01-02 ~ 전일 종가 (일별 종가 기준)"),
             ("재무 기준", "네이버증권 최근 확정 연간 재무제표"),

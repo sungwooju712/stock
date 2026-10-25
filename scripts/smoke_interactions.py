@@ -292,6 +292,7 @@ def main() -> int:
     pump(app, 0.1)
     check("search navigates analysis", window._current_page == "analysis")
     check("search opens stock", window.analysis.current_code == "000660", str(window.analysis.current_code))
+    check("creator credit", "최미경" in window.sidebar_creator.text(), window.sidebar_creator.text())
     window.navigate("settings")
     pump(app, 0.05)
     check("settings page", window._current_page == "settings")

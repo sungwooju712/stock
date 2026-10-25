@@ -32,6 +32,7 @@ from .constants import (
     APP_NAME,
     APP_TAGLINE,
     COLORS,
+    CREATOR_NAME,
     DISCLAIMER,
     SOURCE_NAME,
     VERSION,
@@ -210,7 +211,14 @@ class MainWindow(QMainWindow):
         data_source.setStyleSheet("font-size: 7pt; color: #8FA9C1;")
         data_layout.addWidget(data_source)
         layout.addWidget(data_card)
-        layout.addSpacing(11)
+        layout.addSpacing(9)
+
+        self.sidebar_creator = QLabel(f"만든 사람 · {CREATOR_NAME}")
+        self.sidebar_creator.setStyleSheet(
+            "font-size: 7.2pt; color: #A9C4DA; font-weight: 700;"
+        )
+        layout.addWidget(self.sidebar_creator)
+        layout.addSpacing(5)
 
         footer = QLabel(
             f"v{VERSION} · 정보 제공용\n{DISCLAIMER}"

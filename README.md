@@ -2,6 +2,8 @@
 
 KOSPI 전 종목의 2023년 이후 종가와 재무·밸류에이션 지표를 한 화면에서 살펴보는 Windows 데스크톱 앱입니다. 네이버증권의 공개 시세·재무 데이터를 사용하며 DART API 키는 필요하지 않습니다.
 
+만든 사람: **최미경**
+
 > 다른 PC로 옮기거나 개발을 이어서 할 때는 [`HANDOFF.md`](HANDOFF.md)를 먼저 읽으세요. GitHub 저장소에는 소스와 샘플 데이터만 포함되며, 휴대용 EXE·전송용 ZIP 같은 빌드 산출물은 포함하지 않습니다.
 
 ## 주요 기능
@@ -91,7 +93,7 @@ py scripts\capture_ui.py
 # 헤드리스 환경
 py scripts\capture_ui.py --offscreen
 
-# 상호작용 스모크 테스트 59개 항목
+# 상호작용 스모크 테스트 60개 항목
 py scripts\smoke_interactions.py
 ```
 

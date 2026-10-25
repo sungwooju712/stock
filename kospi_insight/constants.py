@@ -9,6 +9,7 @@ APP_NAME = "KOSPI 인사이트"
 APP_NAME_EN = "KOSPI Insight"
 APP_TAGLINE = "가치 분석 · 종가 조회 · 스크리너"
 VERSION = "1.0.0"
+CREATOR_NAME = "최미경"
 DATA_START_DATE = date(2023, 1, 1)
 DEFAULT_WATCHLIST = ("005930", "000660", "105560", "055550")
 SOURCE_NAME = "네이버증권 (KRX 시세·재무)"
