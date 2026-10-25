@@ -91,7 +91,7 @@ py scripts\capture_ui.py
 # 헤드리스 환경
 py scripts\capture_ui.py --offscreen
 
-# 상호작용 스모크 테스트 54개 항목
+# 상호작용 스모크 테스트 59개 항목
 py scripts\smoke_interactions.py
 ```
 

@@ -1,6 +1,6 @@
 # KOSPI 인사이트 — 작업 인계 노트
 
-최종 갱신: 2026-10-24 (KST)
+최종 갱신: 2026-10-25 (KST)
 
 이 문서는 다른 PC에서 실행하거나 개발을 이어서 할 때 필요한 정보를 정리한 것입니다.
 AI 대화 자체는 파일로 저장되지 않으므로, 새 PC에서 OpenCode를 열고 이 문서를 먼저 읽게 하면 됩니다.
@@ -8,12 +8,13 @@ AI 대화 자체는 파일로 저장되지 않으므로, 새 PC에서 OpenCode�
 ## 1. 현재 상태
 
 - Windows용 데스크톱 앱 구현 완료: 대시보드, 종목 분석, 스크리너, 즐겨찾기 관리, 데이터·설정
-- 최종 상호작용 테스트: **54/54 통과**
+- 최종 상호작용 테스트: **59/59 통과**
 - 최종 UI 확인: 1440×920, 1180×760 (실제 Windows Qt 렌더링)
 - 최종 휴대용 빌드: `dist\KOSPI Insight\`
-  - `KOSPI Insight.exe` 5,979,102 bytes
+  - `KOSPI Insight.exe` 5,981,244 bytes
   - 전체 262개 파일, 약 145.1 MB
   - 아이콘·한국어 버전 정보 포함
+- 엑셀 차트 겹침 수정: 축 제목을 차트 제목의 단위 표기로 대체하고, 연간 수익률 차트의 데이터 레이블을 제거. 음수 막대의 연도 레이블은 축 아래로 배치
 - 초기 DB: KOSPI **942종목**, 재무 **942종목**, 기본 관심종목 **4개**, 일별 종가 **3,712행**
 - 데이터 기준일: **2026-10-23** (2023-01-02부터 전일 종가까지)
 - 미리보기 엑셀:
@@ -25,9 +26,9 @@ AI 대화 자체는 파일로 저장되지 않으므로, 새 PC에서 OpenCode�
 OneDrive 동기화를 쓰지 않고 USB·클라우드로 옮길 때는 로컬 프로젝트의 `handoff\` 폴더에 있는 압축 파일을 사용합니다.
 이 ZIP들은 용량 때문에 Git 저장소에는 포함하지 않았습니다.
 
-- `handoff\KOSPI_Insight_portable_20261024.zip` — 휴대용 실행본 (약 63 MB)
+- `handoff\KOSPI_Insight_portable_20261025.zip` — 휴대용 실행본 (약 63 MB)
   - 압축을 풀면 `KOSPI Insight\KOSPI Insight.exe`가 나옵니다. 폴더 전체를 유지한 채 실행하세요.
-- `handoff\KOSPI_Insight_source_20261024.zip` — 소스·DB·미리보기 (약 0.8 MB)
+- `handoff\KOSPI_Insight_source_20261025.zip` — 소스·DB·미리보기 (약 0.6 MB)
   - 개발을 이어서 할 때 사용합니다. `dist`는 포함하지 않습니다.
 
 GitHub에서 새로 받는 경우에는 `requirements.txt`를 설치한 뒤 직접 실행하거나 `KOSPIInsight.spec`으로 빌드하면 됩니다.
@@ -102,7 +103,7 @@ kospi_insight/
 scripts/
   build_seed.py             초기 DB 생성
   capture_ui.py             UI 캡처
-  smoke_interactions.py     상호작용 테스트 54개
+  smoke_interactions.py     상호작용 테스트 59개
   generate_previews.py      미리보기 엑셀 재생성
 assets/
   seed_kospi.db             배포용 초기 DB
